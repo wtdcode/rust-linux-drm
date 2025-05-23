@@ -1,6 +1,4 @@
 #![no_std]
-#![feature(ptr_metadata)]
-#![feature(ascii_char)]
 
 extern crate alloc;
 

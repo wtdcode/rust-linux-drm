@@ -10,6 +10,8 @@ repository = "https://github.com/apparentlymart/rust-linux-drm"
 [dependencies]
 linux-io = "0.11.0"
 linux-unsafe = "0.11.0"
+ptr_meta = "0.3"
+ascii = "1.1"
 
 [package.metadata.docs.rs]
 all-features = true
