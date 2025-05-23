@@ -1,6 +1,7 @@
 use alloc::boxed::Box;
 use alloc::sync::Weak;
 use alloc::vec::Vec;
+#[cfg(feature = "stable_polyfill")]
 use ascii::AsAsciiStr;
 
 use crate::ioctl::DrmCardDevice;
@@ -67,7 +68,14 @@ impl<'card> ObjectPropMeta<'card> {
         // Safety: We assume that raw.name is always ASCII; that should
         // have been guaranteed by any codepath that instantiates
         // an ObjectPropMeta object.
-        raw.as_ascii_str().expect("non-ascii name?!").as_str()
+        #[cfg(feature = "stable_polyfill")]
+        return raw.as_ascii_str().expect("non-ascii name?!").as_str();
+
+        #[cfg(not(feature = "stable_polyfill"))]
+        {
+            let raw = unsafe { raw.as_ascii_unchecked() };
+            return raw.as_str();
+        }
     }
 
     #[inline]
@@ -230,7 +238,14 @@ impl ObjectPropEnumMember {
         // The following assumes that the kernel will only use ASCII
         // characters in enum member names, which has been true so
         // far.
-        raw.as_ascii_str().expect("non-ascii name?!").as_str()
+        #[cfg(feature = "stable_polyfill")]
+        return raw.as_ascii_str().expect("non-ascii name?!").as_str();
+
+        #[cfg(not(feature = "stable_polyfill"))]
+        {
+            let raw = raw.as_ascii().unwrap();
+            return raw.as_str();
+        }
     }
 }
 

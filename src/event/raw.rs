@@ -7,7 +7,7 @@
 /// If you have a byte slice you've read from a card device then you can
 /// use [`DrmEvent::from_bytes`] to safely build a `DrmEvent` from the
 /// first event, if any.
-#[derive(ptr_meta::Pointee)]
+#[cfg_attr(feature = "stable_polyfill", derive(ptr_meta::Pointee))]
 #[repr(C)]
 pub struct DrmEvent {
     pub hdr: DrmEventHeader,
@@ -30,7 +30,11 @@ impl DrmEvent {
     /// [`DrmEvent`] while the header length cannot.
     pub unsafe fn from_event_header<'a>(hdr: &'a DrmEventHeader) -> &'a DrmEvent {
         let ptr = hdr as *const _ as *const ();
+        #[cfg(feature = "stable_polyfill")]
         let ptr = ptr_meta::from_raw_parts(ptr, hdr.len as usize - Self::HEADER_LEN);
+
+        #[cfg(not(feature = "stable_polyfill"))]
+        let ptr = core::ptr::from_raw_parts(ptr, hdr.len as usize - Self::HEADER_LEN);
         &*ptr
     }
 
@@ -73,7 +77,13 @@ impl DrmEvent {
     /// the header.
     pub fn body_len(&self) -> usize {
         let ptr = self as *const DrmEvent;
+
+        #[cfg(not(feature = "stable_polyfill"))]
+        let (_, body_len) = ptr.to_raw_parts();
+
+        #[cfg(feature = "stable_polyfill")]
         let (_, body_len) = ptr_meta::to_raw_parts(ptr);
+
         body_len
     }
 

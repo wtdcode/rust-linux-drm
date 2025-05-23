@@ -1,4 +1,6 @@
 #![no_std]
+#![cfg_attr(not(feature = "stable_polyfill"), feature(ptr_metadata))]
+#![cfg_attr(not(feature = "stable_polyfill"), feature(ascii_char))]
 
 extern crate alloc;
 
